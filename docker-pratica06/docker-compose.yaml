@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  server_ubuntu:
+    build: ./server-ubuntu
+    container_name: server_ubuntu
+    depends_on:
+      - db_postgres
+    networks:
+      - server1_net
+    volumes:
+      - server1_data:/data
+    ports:
+      - "8081:80"
+
+  db_postgres:
+    image: postgres:15
+    container_name: db_postgres
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demopw
+      POSTGRES_DB: demo_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - server1_net
+
+  server_centos:
+    build: ./server-centos
+    container_name: server_centos
+    depends_on:
+      - db_redis
+    networks:
+      - server2_net
+    volumes:
+      - server2_data:/data
+    ports:
+      - "8082:80"
+
+  db_redis:
+    image: redis:7
+    container_name: db_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    networks:
+      - server2_net
+
+networks:
+  server1_net:
+    driver: bridge
+  server2_net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:
+  server1_data:
+  server2_data:
